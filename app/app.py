@@ -5,7 +5,8 @@ from api import post_video, get_video, download_video
 
 # Default file URLs
 default_audio_url = "https://playful-froyo-95db49.netlify.app/trump_voice_2.mp3"
-default_video_url = "https://playful-froyo-95db49.netlify.app/susanne.mp4"
+default_video_url = "https://playful-froyo-95db49.netlify.app/susanne.mp4" 
+demo_processed_video_url = "https://synchlabs-public.s3.amazonaws.com//tmp/7a73c796-11d0-4866-9253-5f66ec09bd83_result.mp4"
 
 def show_video(video_path):
     # File path to your MP4 video
@@ -22,15 +23,32 @@ def run_process(audio_url, video_url, destination_path):
         video_id = response["id"]
         st.info("Video ID: " + video_id)
 
+
+    # Demo - to simulate the workflow without actual computation
     with st.spinner("Checking current status..."):
-        # Fetch status of the process
-        fetch_response = get_video(video_id)
-        while fetch_response["status"] != "COMPLETED":
-            fetch_response = get_video(video_id)
-            print("Status:", fetch_response['status'])
+        sec = 0
+        while sec < 20:
+            print("Status: PROCESSING")
             time.sleep(2)
+            sec += 2
+        
+        print("Status: COMPLETED")
+        fetch_response = {"url": demo_processed_video_url}
+        time.sleep(2)
+
         st.success("Status check completed")
-        st.info("Video URL: " + fetch_response['url'])
+        st.info("Video URL: " + fetch_response["url"])
+
+    # Real - computes the synergized video in ca 3 min
+    # with st.spinner("Checking current status..."):
+    #     # Fetch status of the process
+    #     fetch_response = get_video(video_id)
+    #     while fetch_response["status"] != "COMPLETED":
+    #         fetch_response = get_video(video_id)
+    #         print("Status:", fetch_response['status'])
+    #         time.sleep(2)
+    #     st.success("Status check completed")
+    #     st.info("Video URL: " + fetch_response['url'])
         
     with st.spinner("Downloading file..."):
         # Download video

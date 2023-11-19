@@ -62,8 +62,8 @@ def run_process(audio_url, video_url, destination_path):
 
     show_video(video_path)
 
-def upload_file(upload_directory, typee, keyy):
-    uploaded_file = st.file_uploader("Upload here:", type=[typee], key=keyy)
+def upload_file(upload_directory, type, keyy):
+    uploaded_file = st.file_uploader("Upload here:", type=[type], key=keyy)
     if uploaded_file is not None:
         file_path = os.path.join(upload_directory, uploaded_file.name)
         with open(file_path, "wb") as f:

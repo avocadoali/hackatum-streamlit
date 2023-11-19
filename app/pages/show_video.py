@@ -6,6 +6,9 @@ def video_gallery(directory_path):
     
     for video_file in video_files:
         video_path = os.path.join(directory_path, video_file)
+        video_basename = os.path.basename(video_file)
+        
+        st.header(video_basename)
         st.video(video_path)
 
 # Example usage

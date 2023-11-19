@@ -61,7 +61,7 @@ def show_video(video_path):
     # File path to your MP4 video
     st.video(video_path)
 
-def run_process(audio_url, video_url, destination_path):
+def run_processs(audio_url, video_url, destination_path):
     # Upload audio and video file
     
     print("start uploading")
@@ -70,7 +70,9 @@ def run_process(audio_url, video_url, destination_path):
     video_id = response["id"]
     print("video id: " + video_id)
 
-    print("Curren status")
+    start_time = time.time()
+
+    print("Current status")
     # Fetch status of process
     fetch_response = fetch_video_data(video_id)
     print(fetch_response)
@@ -79,6 +81,14 @@ def run_process(audio_url, video_url, destination_path):
         print(fetch_response) 
         time.sleep(2)
     
+    # Record end time
+    end_time = time.time()
+    
+    # Calculate and print elapsed time
+    elapsed_time = end_time - start_time
+    print(f"Elapsed time: {elapsed_time} seconds")
+    
+
     print("Downloading file")
     # Download video
     deepfake_video_url = fetch_response["url"]
@@ -86,6 +96,36 @@ def run_process(audio_url, video_url, destination_path):
     download_video(deepfake_video_url, destination_path)
     video_path= destination_path
     print("Fiel is in: " + video_path)
+
+    show_video(video_path)
+
+def run_process(audio_url, video_url, destination_path):
+    st.write(video_url)
+    st.write(audio_url)
+    # Upload audio and video file
+    with st.spinner("Uploading..."):
+        response = post(audio_url, video_url)
+        st.success("Upload completed")
+        video_id = response["id"]
+        st.info("Video ID: " + video_id)
+
+    with st.spinner("Checking current status..."):
+        # Fetch status of the process
+        fetch_response = fetch_video_data(video_id)
+        while fetch_response["status"] != "COMPLETED":
+            fetch_response = fetch_video_data(video_id)
+        st.success("Status check completed")
+        st.info(fetch_response)
+        
+    with st.spinner("Downloading file..."):
+        # Download video
+        deepfake_video_url = fetch_response["url"]
+        download_video(deepfake_video_url, destination_path)
+        st.success("Download completed")
+        video_path = destination_path
+        st.info("File is in: " + video_path)
+
+        st.success("Process completed successfully")
 
     show_video(video_path)
 
@@ -103,29 +143,58 @@ st.title("Video and Audio File Uploader")
 default_audio_url = "https://playful-froyo-95db49.netlify.app/trump_voice_2.mp3"
 default_video_url = "https://playful-froyo-95db49.netlify.app/susanne.mp4"
 
+def upload_file(upload_directory, typee, keyy):
+    uploaded_file = st.file_uploader("Upload here:", type=[typee], key=keyy)
+    if uploaded_file is not None:
+        file_path = os.path.join(upload_directory, uploaded_file.name)
+        with open(file_path, "wb") as f:
+            f.write(uploaded_file.getvalue())
+        st.success(f"File successfully uploaded to {file_path}")
+
 # Upload audio file
-audio_file = st.file_uploader("Upload Audio File (MP3)", type=["mp3"], key="audio")
-audio_url = st.text_input("Or use Default Audio URL", default_audio_url)
+st.subheader("Upload Audio File")
+audio_file = upload_file("app/static/input/audio", "mp3", "audio")
 
+audio_url = st.text_input("Or use Default Audio URL:", default_audio_url)
+
+st.write("")
 # Upload video file
-video_file = st.file_uploader("Upload Video File (MP4)", type=["mp4"], key="video")
-video_url = st.text_input("Or use Default Video URL", default_video_url)
 
+st.subheader("Upload Video File")
+video_file = upload_file("app/static/input/video", "mp4", "video")
+video_url = st.text_input("Or use Default Video URL:", default_video_url)
+
+st.write("")
+
+st.subheader("Specify output filename")
 # Destination path
-destination_path = st.text_input("Destination Path", "./app/static/finaloutput/susanne_autogen.mp4")
+p= st.text_input("Filename:", "output.mp4")
+destination_path = "./app/static/finaloutput/" + p
 
-# Display uploaded file details
-if audio_file is not None:
-    st.audio(audio_file, format="audio/mp3", start_time=0)
-    st.markdown(f"Audio File: {audio_file.name}")
-else:
-    st.audio(audio_url, format="audio/mp3", start_time=0)
+st.write("")
 
-if video_file is not None:
-    st.video(video_file, format="video/mp4", start_time=0)
-    st.markdown(f"Video File: {video_file.name}")
-else:
-    st.video(video_url, format="video/mp4", start_time=0)
+st.subheader("Selected Files")
+
+# Create two columns with st.columns
+col2, col1 = st.columns(2)
+with col1:
+    # Display uploaded file details
+    st.write("Audiofile:")
+    if audio_file is not None:
+        st.audio(audio_file, format="audio/mp3", start_time=0)
+        st.markdown(f"Audio File: {audio_file.name}")
+    else:
+        st.audio(audio_url, format="audio/mp3", start_time=0)
+
+
+with col2:
+    st.write("Videofile:")
+
+    if video_file is not None:
+        st.video(video_file, format="video/mp4", start_time=0)
+        st.markdown(f"Video File: {video_file.name}")
+    else:
+        st.video(video_url, format="video/mp4", start_time=0)
 
 # Button to process files
 if st.button("Process Files"):

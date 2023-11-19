@@ -1,6 +1,14 @@
+import os
 import streamlit as st
 
-# File path to your MP4 video
-video_path = "app/static/finaloutput/out.mp4"
-# Display the video
-st.video(video_path)
+def video_gallery(directory_path):
+    video_files = [f for f in os.listdir(directory_path) if f.endswith(('.mp4', '.avi', '.mkv', '.mov'))]
+    
+    for video_file in video_files:
+        video_path = os.path.join(directory_path, video_file)
+        st.video(video_path)
+
+# Example usage
+video_directory = "app/static/finaloutput"
+st.title("Video Gallery")
+video_gallery(video_directory)
